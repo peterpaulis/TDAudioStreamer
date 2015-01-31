@@ -70,7 +70,11 @@
 
         self.isPlaying = YES;
 
-        while (self.isPlaying && [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) ;
+        while ((![[NSThread currentThread] isCancelled]) && self.isPlaying && [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) {}
+        
+        self.isPlaying = NO;
+        [self.audioQueue stop];
+        
     }
 }
 
@@ -183,13 +187,7 @@
 
 - (void)stop
 {
-    [self performSelector:@selector(stopThread) onThread:self.audioStreamerThread withObject:nil waitUntilDone:YES];
-}
-
-- (void)stopThread
-{
-    self.isPlaying = NO;
-    [self.audioQueue stop];
+    [self.audioStreamerThread cancel];
 }
 
 @end

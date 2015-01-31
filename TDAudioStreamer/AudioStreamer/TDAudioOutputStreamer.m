@@ -54,8 +54,12 @@
         self.isStreaming = YES;
         NSLog(@"Loop");
 
-        while (self.isStreaming && [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) ;
+        while ((![[NSThread currentThread] isCancelled]) && self.isStreaming && [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) {}
 
+        self.isStreaming = NO;
+        [self.audioStream close];
+        NSLog(@"Stop");
+        
         NSLog(@"Done");
     }
 }
@@ -107,14 +111,7 @@
 
 - (void)stop
 {
-    [self performSelector:@selector(stopThread) onThread:self.streamThread withObject:nil waitUntilDone:YES];
-}
-
-- (void)stopThread
-{
-    self.isStreaming = NO;
-    [self.audioStream close];
-    NSLog(@"Stop");
+    [self.streamThread cancel];
 }
 
 #pragma mark - TDAudioStreamDelegate
